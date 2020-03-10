@@ -27,7 +27,7 @@ env:
   REPO_BRANCH: master
   CONFIG_FILE: seed-docker-lede.config
   DIY_SH: diy.sh
-  FREE_UP_DISK: false
+  FREE_UP_DISK: true
   SSH_ACTIONS: false
   UPLOAD_BIN_DIR: true
   UPLOAD_FIRMWARE: true
@@ -60,7 +60,7 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
       run: |
         sudo rm -rf /usr/share/dotnet
-        docker rmi `docker images -q`
+        # docker rmi `docker images -q`
         sudo -E apt-get -q purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
