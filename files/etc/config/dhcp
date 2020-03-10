@@ -1,0 +1,71 @@
+
+config dnsmasq
+	option domainneeded '1'
+	option localise_queries '1'
+	option rebind_protection '1'
+	option rebind_localhost '1'
+	option local '/lan/'
+	option domain 'lan'
+	option expandhosts '1'
+	option authoritative '1'
+	option readethers '1'
+	option leasefile '/tmp/dhcp.leases'
+	option nonwildcard '1'
+	option localservice '1'
+	option port '53'
+	option cachesize '4096'
+	option mini_ttl '86400'
+	option resolvfile '/tmp/resolv.conf.auto'
+	list server '127.0.0.1#5333'
+	option noresolv '0'
+
+config dhcp 'lan'
+	option interface 'lan'
+	option dhcpv6 'server'
+	option ra 'server'
+	option ra_management '1'
+	option start '100'
+	option limit '150'
+	option leasetime '12h'
+
+config dhcp 'wan'
+	option interface 'wan'
+	option ignore '1'
+
+config odhcpd 'odhcpd'
+	option maindhcp '0'
+	option leasefile '/tmp/hosts/odhcpd'
+	option leasetrigger '/usr/sbin/odhcpd-update'
+	option loglevel '4'
+
+config srvhost
+	option srv '_vlmcs._tcp'
+	option target 'OpenWrt'
+	option port '1688'
+	option class '0'
+	option weight '100'
+
+config host
+	option name 'DESKTOP-6100'
+	option dns '1'
+	option mac '70:8b:cd:a4:a8:ae'
+	option ip '192.168.1.100'
+
+config host
+	option name 'DESKTOP-lenvo'
+	option dns '1'
+	option mac '74:e5:43:1a:18:29'
+	option ip '192.168.1.110'
+
+config host
+	option name 'RedmiNote8Pro'
+	option dns '1'
+	option mac 'd8:ce:3a:d3:67:7d'
+	option ip '192.168.1.200'
+
+config host
+	option name 'virtual-ubuntu19'
+	option dns '1'
+	option mac '00:0c:29:66:78:5f'
+	option ip '192.168.1.120'
+

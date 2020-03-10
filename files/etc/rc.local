@@ -1,0 +1,8 @@
+# 修复docker网络卡的问题
+cat > /etc/resolv.conf <<EOF
+search lan
+nameserver 127.0.0.1
+options ndots:0
+EOF
+
+exit 0
