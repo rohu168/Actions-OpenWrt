@@ -152,7 +152,7 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
-        script: cd ccx && bash autoRsetOP.sh &
+        script: cd ccx && (bash autoRsetOP.sh &)
 
     - name: WeChat notification
       if: env.WECHAT == 'true'
