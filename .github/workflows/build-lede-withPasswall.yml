@@ -156,5 +156,5 @@ jobs:
 
     - name: WeChat notification
       if: env.WECHAT == 'true'
-      run: curl https://sc.ftqq.com/${{ secrets.SCKEY }}.send?text=自动更新N1固件成功！&desp=源码:${{ env.REPO_URL }}
+      run: curl https://sc.ftqq.com/${{ secrets.SCKEY }}.send?text=自动更新N1固件成功！&desp=源码:${env.REPO_URL}
 
