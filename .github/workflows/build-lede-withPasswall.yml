@@ -155,7 +155,7 @@ jobs:
         script: cd ccx && (bash autoRsetOP.sh &)
 
     - name: Sending message
-      if: env.AUTORSETOP == 'true' && SENDMSG == 'true'
+      if: env.AUTORSETOP == 'true' && env.SENDMSG == 'true'
       uses: yakumioto/serverchan-action@v1
       with:
         key: ${{ secrets.SCKEY }}
@@ -163,7 +163,7 @@ jobs:
         desp: 源码:${{ env.REPO_URL }}
 
     - name: Sending message
-      if: env.AUTORSETOP == 'false' && SENDMSG == 'true'
+      if: env.AUTORSETOP == 'false' && env.SENDMSG == 'true'
       uses: yakumioto/serverchan-action@v1
       with:
         key: ${{ secrets.SCKEY }}
