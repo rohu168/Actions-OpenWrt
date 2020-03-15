@@ -19,8 +19,8 @@ on:
 # # 国际标准时间定时编译 +8是北京时间
   schedule:
     - cron: 0 18 * * *
-  watch:
-    types: started 
+  # watch:
+  #   types: started 
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
@@ -28,12 +28,12 @@ env:
   CONFIG_FILE: seed-docker-lede.config
   DIY_SH: diy.sh
   SSH_ACTIONS: false
-  UPLOAD_BIN_DIR: true
+  UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   TZ: Asia/Shanghai
-  UPLOAD_TO_N1: true
-  AUTOSSH: true
-  WECHAT: true
+  UPLOAD_TO_N1: false
+  AUTORSETOP: false
+  SENDMSG: true
 
 jobs:
   build:
@@ -145,7 +145,7 @@ jobs:
         strip_components: 5
 
     - name: 自动更新N1固件
-      if: env.AUTOSSH == 'true' && success()
+      if: env.AUTORSETOP == 'true' && success()
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST }}
@@ -154,7 +154,23 @@ jobs:
         port: ${{ secrets.PORT }}
         script: cd ccx && (bash autoRsetOP.sh &)
 
-    - name: WeChat notification
-      if: env.WECHAT == 'true'
-      run: curl https://sc.ftqq.com/${{ secrets.SCKEY }}.send?text=自动更新N1固件成功！&desp=源码:${env.REPO_URL}
+    - name: Sending message
+      if: env.AUTORSETOP == 'true' && SENDMSG == 'true'
+      uses: yakumioto/serverchan-action@v1
+      with:
+        key: ${{ secrets.SCKEY }}
+        text: 自动更新N1固件成功！
+        desp: 源码:${{ env.REPO_URL }}
+
+    - name: Sending message
+      if: env.AUTORSETOP == 'false' && SENDMSG == 'true'
+      uses: yakumioto/serverchan-action@v1
+      with:
+        key: ${{ secrets.SCKEY }}
+        text: 固件编译成功！
+        desp: 源码:${{ env.REPO_URL }}
+
+    # - name: WeChat notification
+    #   if: env.WECHAT == 'true'
+    #   run: curl https://sc.ftqq.com/${{ secrets.SCKEY }}.send?text=自动更新N1固件成功！&desp=源码:${env.REPO_URL}
 

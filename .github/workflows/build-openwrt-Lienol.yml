@@ -10,17 +10,17 @@ name: Build OpenWrt
 
 on:
   release:
-    types: [published]
+    types: published
 #  push:
 #    branches: 
 #      - master
 #    paths:
 #      - '.config'
-# 国际标准时间定时编译 +8是北京时间
+# # 国际标准时间定时编译 +8是北京时间
   schedule:
     - cron: 0 18 * * *
-  # watch:
-  #   types: [started] 
+  watch:
+    types: started 
 
 env:
   REPO_URL: https://github.com/Lienol/openwrt
@@ -28,16 +28,18 @@ env:
   REPO_BRANCH: dev-lean-lede
   CONFIG_FILE: seed-docker-lienol-devleanlede.config
   DIY_SH: diy.sh
-  FREE_UP_DISK: true
   SSH_ACTIONS: false
-  UPLOAD_BIN_DIR: true
+  UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   TZ: Asia/Shanghai
+  UPLOAD_TO_N1: true
+  AUTORSETOP:  true
+  SENDMSG: true
 
 jobs:
   build:
-    if: github.event.repository.owner.id == github.event.sender.id
     runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id
 
     steps:
     - name: Checkout
@@ -48,21 +50,12 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
       run: |
         sudo swapoff /swapfile
-        sudo rm -rf /swapfile /etc/apt/sources.list.d/*
+        sudo rm -rf /swapfile /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt-get -qq update
-        sudo -E apt-get -qq install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
-        curl -fsSL https://raw.githubusercontent.com/P3TERX/dotfiles/master/.bashrc >> ~/.bashrc
-
-    - name: Free up disk space
-      if: env.FREE_UP_DISK == 'true'
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: |
-        sudo rm -rf /usr/share/dotnet
-        docker rmi `docker images -q`
-        sudo -E apt-get -q purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
+        sudo -E apt-get -qq install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs gcc-multilib g++-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
+        curl -fsSL https://raw.githubusercontent.com/P3TERX/dotfiles/master/.bashrc >> ~/.bashrc
 
     - name: Clone source code
       run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
@@ -80,7 +73,6 @@ jobs:
         chmod +x $DIY_SH
         cd openwrt
         ../$DIY_SH
-        make defconfig
 
     - name: SSH connection to Actions
       uses: P3TERX/debugger-action@master
@@ -90,6 +82,7 @@ jobs:
       id: package
       run: |
         cd openwrt
+        make defconfig
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
@@ -106,7 +99,7 @@ jobs:
       uses: actions/upload-artifact@master
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       with:
-        name: OpenWrt_directory
+        name: OpenWrt_bin
         path: openwrt/bin
 
     - name: Organize files
@@ -115,7 +108,7 @@ jobs:
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf packages
-        echo "::set-env name=FIRMWARE::$(pwd)"
+        echo "::set-env name=FIRMWARE::$PWD"
         echo "::set-output name=status::success"
 
     - name: Upload firmware directory
@@ -124,3 +117,57 @@ jobs:
       with:
         name: OpenWrt_firmware
         path: ${{ env.FIRMWARE }}
+
+
+    # - name: 更改固件包名
+    #   id: changename
+    #   run: |
+    #     cd openwrt/bin/targets/*/*
+    #     targz="Auto$((10#$(date +"%m%d")))v$((10#$(date +"%H")+8))-op.tar.gz"
+    #     mv openwrt-armvirt-64-default-rootfs.tar.gz  ${targz}
+    #     echo "::set-env name=FIRMWARENAME::${{ env.FIRMWARE }}/${targz}"
+    #     echo "::set-output name=status::success"
+
+    - name: 上传固件到N1
+      if: env.UPLOAD_TO_N1 == 'true' && steps.organize.outputs.status == 'success' && !cancelled()
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        # rm: 1 # 上传前先清空目录
+        source: "openwrt/bin/targets/armvirt/64/openwrt-armvirt-64-default-rootfs.tar.gz"
+        target: "ccx"
+        strip_components: 5
+
+    - name: 自动更新N1固件
+      if: env.AUTORSETOP == 'true' && success()
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        script: cd ccx && (bash autoRsetOP.sh &)
+
+    - name: Sending message
+      if: env.AUTORSETOP == 'true' && SENDMSG == 'true'
+      uses: yakumioto/serverchan-action@v1
+      with:
+        key: ${{ secrets.SCKEY }}
+        text: 自动更新N1固件成功！
+        desp: 源码:${{ env.REPO_URL }}
+
+    - name: Sending message
+      if: env.AUTORSETOP == 'false' && SENDMSG == 'true'
+      uses: yakumioto/serverchan-action@v1
+      with:
+        key: ${{ secrets.SCKEY }}
+        text: 固件编译成功！
+        desp: 源码:${{ env.REPO_URL }}
+
+    # - name: WeChat notification
+    #   if: env.WECHAT == 'true'
+    #   run: curl https://sc.ftqq.com/${{ secrets.SCKEY }}.send?text=自动更新N1固件成功！&desp=源码:${env.REPO_URL}
+
