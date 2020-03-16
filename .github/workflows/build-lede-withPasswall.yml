@@ -17,10 +17,11 @@ on:
 #    paths:
 #      - '.config'
 # # 国际标准时间定时编译 +8是北京时间
-  schedule:
-    - cron: 0 18 * * *
-  # watch:
-  #   types: started 
+  # schedule:
+  #   - cron: 0 18 * * *
+  watch:
+    types: started 
+
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
@@ -32,7 +33,8 @@ env:
   UPLOAD_FIRMWARE: true
   TZ: Asia/Shanghai
   UPLOAD_TO_N1: false
-  AUTORSETOP: false
+  # 注意设【AUTORSETOP】为true,【UPLOAD_TO_N1】也要为true
+  AUTORSETOP: false 
   SENDMSG: true
 
 jobs:
@@ -111,6 +113,7 @@ jobs:
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf packages
+        md5sum openwrt-armvirt-64-default-rootfs.tar.gz > openwrt-armvirt-64-default-rootfs.tar.gz.md5
         echo "::set-env name=FIRMWARE::$PWD"
         echo "::set-output name=status::success"
 
@@ -140,12 +143,13 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
         # rm: 1 # 上传前先清空目录
-        source: "openwrt/bin/targets/armvirt/64/openwrt-armvirt-64-default-rootfs.tar.gz"
+        source: "openwrt/bin/targets/armvirt/64/openwrt-armvirt-64-default-rootfs.tar.gz,\
+        openwrt/bin/targets/armvirt/64/openwrt-armvirt-64-default-rootfs.tar.gz.md5"
         target: "ccx"
         strip_components: 5
 
     - name: 自动更新N1固件
-      if: env.AUTORSETOP == 'true' && success()
+      if: env.UPLOAD_TO_N1 == 'true' && env.AUTORSETOP == 'true' && success()
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST }}
@@ -155,20 +159,30 @@ jobs:
         script: cd ccx && (bash autoRsetOP.sh &)
 
     - name: Sending message
-      if: env.AUTORSETOP == 'true' && env.SENDMSG == 'true'
+      if: env.UPLOAD_TO_N1 == 'false' && env.SENDMSG == 'true'
       uses: yakumioto/serverchan-action@v1
       with:
         key: ${{ secrets.SCKEY }}
-        text: 自动更新N1固件成功！
+        text: 固件编译完成！
         desp: 源码:${{ env.REPO_URL }}
 
     - name: Sending message
-      if: env.AUTORSETOP == 'false' && env.SENDMSG == 'true'
+      if: env.UPLOAD_TO_N1 == 'true' && env.AUTORSETOP == 'false' && env.SENDMSG == 'true'
       uses: yakumioto/serverchan-action@v1
       with:
         key: ${{ secrets.SCKEY }}
-        text: 固件编译成功！
+        text: 固件上传到N1完成！
         desp: 源码:${{ env.REPO_URL }}
+
+    - name: Sending message
+      if: env.UPLOAD_TO_N1 == 'true' &&　env.AUTORSETOP == 'true' && env.SENDMSG == 'true'
+      uses: yakumioto/serverchan-action@v1
+      with:
+        key: ${{ secrets.SCKEY }}
+        text: 自动更新N1固件完成！
+        desp: 源码:${{ env.REPO_URL }}
+
+
 
     # - name: WeChat notification
     #   if: env.WECHAT == 'true'
