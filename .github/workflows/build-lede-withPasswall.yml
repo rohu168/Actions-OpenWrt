@@ -19,14 +19,15 @@ on:
 # # 国际标准时间定时编译 +8是北京时间
   schedule:
     - cron: 0 18 * * *
-  # watch:
-  #   types: started 
+  watch:
+    types: started 
 
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  CONFIG_FILE: seed-docker-lede.config
+  # CONFIG_FILE: seed-docker-lede.config
+  CONFIG_FILE: arm64-r20.3.11-20200314-huge-test.config
   DIY_SH: diy.sh
   SSH_ACTIONS: false
   UPLOAD_BIN_DIR: false
