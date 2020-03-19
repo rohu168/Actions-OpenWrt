@@ -34,7 +34,7 @@ env:
   TZ: Asia/Shanghai
   UPLOAD_TO_N1: true
   # 注意设【AUTORSETOP】为true,【UPLOAD_TO_N1】也要为true
-  AUTORSETOP:  true
+  AUTORSETOP: true
   SENDMSG: true
 
 jobs:
@@ -70,7 +70,7 @@ jobs:
     - name: Load custom configuration
       run: |
         [ -e files ] && mv files openwrt/files
-        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+        [ -e "config/$CONFIG_FILE" ] && mv config/$CONFIG_FILE openwrt/.config
         chmod +x $DIY_SH
         cd openwrt
         ../$DIY_SH

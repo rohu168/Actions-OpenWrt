@@ -19,23 +19,22 @@ on:
 # # 国际标准时间定时编译 +8是北京时间
   schedule:
     - cron: 0 18 * * *
-#  watch:
-#    types: started 
+  watch:
+    types: started 
 
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  # CONFIG_FILE: seed-docker-lede.config
-  CONFIG_FILE: arm64-r20.3.11-20200314-huge-test.config
+  CONFIG_FILE: seed-docker-lede-0319.config
   DIY_SH: diy.sh
   SSH_ACTIONS: false
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   TZ: Asia/Shanghai
-  UPLOAD_TO_N1: false
+  UPLOAD_TO_N1: true
   # 注意设【AUTORSETOP】为true,【UPLOAD_TO_N1】也要为true
-  AUTORSETOP: false 
+  AUTORSETOP: true
   SENDMSG: true
 
 jobs:
@@ -75,7 +74,7 @@ jobs:
     - name: Load custom configuration
       run: |
         [ -e files ] && mv files openwrt/files
-        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+        [ -e "config/$CONFIG_FILE" ] && mv config/$CONFIG_FILE openwrt/.config
         chmod +x $DIY_SH
         cd openwrt
         ../$DIY_SH
