@@ -34,7 +34,7 @@ env:
   TZ: Asia/Shanghai
   UPLOAD_TO_N1: true
   # 注意设【AUTORSETOP】为true,【UPLOAD_TO_N1】也要为true
-  AUTORSETOP: true
+  AUTORSETOP: false
   SENDMSG: true
 
 jobs:
