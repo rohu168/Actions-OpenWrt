@@ -32,7 +32,7 @@ env:
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   TZ: Asia/Shanghai
-  UPLOAD_TO_N1: true
+  UPLOAD_TO_N1: false
   # 注意设【AUTORSETOP】为true,【UPLOAD_TO_N1】也要为true
   AUTORSETOP: false
   SENDMSG: true
