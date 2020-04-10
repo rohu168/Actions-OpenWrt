@@ -18,8 +18,8 @@ on:
 #    paths:
 #      - '.config'
 # # 国际标准时间定时编译 +8是北京时间
-  schedule:
-    - cron: 0 18 * * *
+  # schedule:
+  #   - cron: 0 18 * * *
   # watch:
   #   types: started 
 
