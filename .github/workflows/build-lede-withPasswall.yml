@@ -171,7 +171,11 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
-        script: cd ccx && (bash autoRsetOP.sh &)
+        envs: REPO_URL,REPO_BRANCH,CONFIG_FILE
+        script: |
+          cd ccx 
+          export REPO_URL REPO_BRANCH CONFIG_FILE
+          (bash autoRsetOP.sh &)
 
     - name: Sending message
       if: env.UPLOAD_TO_N1 == 'false' && env.SENDMSG == 'true'
@@ -189,17 +193,13 @@ jobs:
         text: 固件上传到N1完成！
         desp: 源码:${{ env.REPO_URL }}
 
-    - name: Sending message
-      if: env.UPLOAD_TO_N1 == 'true' &&　env.AUTORSETOP == 'true' && env.SENDMSG == 'true'
-      uses: yakumioto/serverchan-action@v1
-      with:
-        key: ${{ secrets.SCKEY }}
-        text: 自动更新N1固件完成！
-        desp: 源码:${{ env.REPO_URL }}
+    # - name: Sending message
+    #   if: env.UPLOAD_TO_N1 == 'true' &&　env.AUTORSETOP == 'true' && env.SENDMSG == 'true'
+    #   uses: yakumioto/serverchan-action@v1
+    #   with:
+    #     key: ${{ secrets.SCKEY }}
+    #     text: 自动更新N1固件完成！
+    #     desp: 源码:${{ env.REPO_URL }}
 
 
-
-    # - name: WeChat notification
-    #   if: env.WECHAT == 'true'
-    #   run: curl https://sc.ftqq.com/${{ secrets.SCKEY }}.send?text=自动更新N1固件成功！&desp=源码:${env.REPO_URL}
 
