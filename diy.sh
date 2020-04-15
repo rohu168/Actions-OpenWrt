@@ -18,5 +18,6 @@ git clone https://github.com/rufengsuixing/luci-app-adguardhome.git package/ccx/
 #git clone https://github.com/rohu168/smartdns.git  package/ccx/smartdns
 git clone https://github.com/pymumu/smartdns.git package/ccx/smartdns
 git clone https://github.com/Apocalypsor/luci-app-smartdns.git package/ccx/luci-app-smartdns
-git clone https://github.com/openwrt-develop/luci-app-koolproxy.git package/ccx/luci-app-koolproxy
+git clone https://github.com/project-openwrt/luci-app-koolproxyR.git package/ccx/luci-app-koolproxyR
 git clone https://github.com/rosywrt/luci-theme-rosy.git package/ccx/luci-theme-rosy
+git clone https://github.com/vernesong/OpenClash.git package/ccx/OpenClash
