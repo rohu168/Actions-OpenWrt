@@ -1,8 +1,11 @@
 #!/bin/bash
-STR=$(grep 'github.com/Lienol/openwrt-package' feeds.conf.default)
-if [ -z  "$STR" ];then
-  echo "src-git lienol https://github.com/Lienol/openwrt-package" >> feeds.conf.default
-fi
+# STR=$(grep 'github.com/Lienol/openwrt-package' feeds.conf.default)
+# if [ -z  "$STR" ];then
+#   echo "src-git lienol https://github.com/Lienol/openwrt-package" >> feeds.conf.default
+# fi
+sed -i 's/\#src-git helloworld/\src-git helloworld/g' ./feeds.conf.default
+echo "src-git lienol https://github.com/rohu168/openwrt-package" >> feeds.conf.default
+
 ./scripts/feeds clean
 ./scripts/feeds update -a
 rm -rf feeds/lienol/lienol/v2ray
