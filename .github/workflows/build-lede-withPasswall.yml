@@ -175,7 +175,7 @@ jobs:
         script: |
           cd ccx 
           export REPO_URL REPO_BRANCH CONFIG_FILE
-          (bash autoRsetOP.sh &)
+          nohup bash autoRsetOP.sh &
 
     - name: Sending message
       if: env.UPLOAD_TO_N1 == 'false' && env.SENDMSG == 'true'
